@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db": ""
+    "db": "mysql --login-path=employee-tracker employee",
+    "migrate": "npm run mysql < db/schema.sql",
+    "seed": "npm run mysql < db/seeds.sql",
+    "start": "nodemon server.js"
   },
   "repository": {
     "type": "git",
