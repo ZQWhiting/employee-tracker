@@ -3,6 +3,7 @@ const db = require('../../db/database');
 const inputCheck = require('../../utils/inputCheck');
 
 router.get('/employees', (req, res) => {
+
     const sql = `SELECT
     e.id,
     e.first_name,
@@ -11,11 +12,13 @@ router.get('/employees', (req, res) => {
     role.salary,
     department.name AS department,
     CONCAT(m.first_name, ' ', m.last_name) AS manager
+
     FROM employee e
     LEFT JOIN (role, department)
     ON (role.id = e.role_id AND department.id = role.department_id)
     LEFT JOIN employee m
     ON m.id = e.manager_id`
+
     const params = [];
 
     db.execute(sql, params, (err, rows) => {
@@ -38,10 +41,12 @@ router.get('/employees/manager/:id', (req, res) => {
     e.first_name,
     e.last_name,
     CONCAT(m.first_name, ' ', m.last_name) AS manager
+
     FROM employee e
     LEFT JOIN employee m
     ON m.id = e.manager_id
     WHERE e.manager_id = ?`
+
     const params = [req.params.id]
 
     db.execute(sql, params, (err, rows) => {
@@ -64,6 +69,7 @@ router.get('/employees/department/:id', (req, res) => {
     employee.first_name,
     employee.last_name,
     department.name AS department
+
     FROM employee
     LEFT JOIN (role, department)
     ON (role.id = employee.role_id AND role.department_id = department.id)

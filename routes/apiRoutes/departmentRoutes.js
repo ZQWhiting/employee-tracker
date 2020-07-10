@@ -19,6 +19,33 @@ router.get('/departments', (req, res) => {
     });
 });
 
+//View the total utilized budget of a department—
+//i.e., the combined salaries of all employees in that department.
+router.get('/departments/salary/:id', (req, res) => {
+
+    const sql = `SELECT
+    department.name AS department,
+    SUM(role.salary) AS 'utilized budget'
+    FROM employee
+    LEFT JOIN (role, department)
+    ON (role.id = employee.role_id AND department.id = role.department_id)
+    WHERE department_id = ?`
+
+    const params = [req.params.id];
+
+    db.execute(sql, params, (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+
+        res.json({
+            message: 'success',
+            data: rows
+        });
+    });
+});
+
 router.post('/department', ({body}, res) => {
 
     const errors = inputCheck(body, 'name');
