@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Use apiRoutes
-//app.use('/api', apiRoutes);
+app.use('/api', apiRoutes);
 
 // ----------Don't add any code below------------- //
 // default response for any other request(Not Found) Catch all
