@@ -27,7 +27,11 @@ router.post('/role', ({body}, res) => {
         return;
     }
 
-    const sql = `INSERT INTO role (title, salary, department_id) VALUES (?,?,?)`
+    const sql = `
+    INSERT INTO role (title, salary, department_id)
+        VALUES (?,?,?)
+    `;
+
     const params = [body.title, body.salary, body.department_id]
 
     db.execute(sql, params, (err, result) => {
@@ -46,7 +50,14 @@ router.post('/role', ({body}, res) => {
 
 router.delete('/role/:id', (req, res) => {
 
-    const sql = `DELETE FROM role WHERE id = ?`;
+    const sql = `
+    DELETE
+
+    FROM role
+
+    WHERE id = ?
+    `;
+
     const params = [req.params.id];
 
     db.execute(sql, params, (err, result) => {

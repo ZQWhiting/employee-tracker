@@ -23,13 +23,18 @@ router.get('/departments', (req, res) => {
 //i.e., the combined salaries of all employees in that department.
 router.get('/departments/salary/:id', (req, res) => {
 
-    const sql = `SELECT
-    department.name AS department,
-    SUM(role.salary) AS 'utilized budget'
+    const sql = `
+    SELECT
+        department.name AS department,
+        SUM(role.salary) AS 'utilized budget'
+
     FROM employee
+
     LEFT JOIN (role, department)
-    ON (role.id = employee.role_id AND department.id = role.department_id)
-    WHERE department_id = ?`
+        ON (role.id = employee.role_id AND department.id = role.department_id)
+
+    WHERE department_id = ?
+    ;`
 
     const params = [req.params.id];
 
@@ -54,7 +59,11 @@ router.post('/department', ({body}, res) => {
         return;
     }
 
-    const sql = `INSERT INTO department (name) VALUES (?)`
+    const sql = `
+    INSERT INTO department (name)
+        VALUES (?)
+    `;
+
     const params = [body.name]
 
     db.execute(sql, params, (err, result) => {
@@ -73,7 +82,14 @@ router.post('/department', ({body}, res) => {
 
 router.delete('/department/:id', (req, res) => {
 
-    const sql = `DELETE FROM department WHERE id = ?`;
+    const sql = `
+    DELETE
+
+    FROM department
+
+    WHERE id = ?
+    `;
+
     const params = [req.params.id];
 
     db.execute(sql, params, (err, result) => {
