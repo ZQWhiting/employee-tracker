@@ -4,6 +4,7 @@ const inputCheck = require('../../utils/inputCheck');
 
 router.get('/employees', (req, res) => {
     const sql = `SELECT
+    e.id,
     e.first_name,
     e.last_name,
     role.title AS Role,
@@ -33,6 +34,7 @@ router.get('/employees', (req, res) => {
 router.get('/employees/manager/:id', (req, res) => {
 
     const sql = `SELECT
+    e.id,
     e.first_name,
     e.last_name,
     CONCAT(m.first_name, ' ', m.last_name) AS manager
@@ -58,6 +60,7 @@ router.get('/employees/manager/:id', (req, res) => {
 router.get('/employees/department/:id', (req, res) => {
 
     const sql = `SELECT
+    employee.id,
     employee.first_name,
     employee.last_name,
     department.name AS department
