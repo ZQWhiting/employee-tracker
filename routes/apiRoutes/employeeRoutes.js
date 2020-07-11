@@ -2,6 +2,38 @@ const router = require('express').Router();
 const db = require('../../db/database');
 const inputCheck = require('../../utils/inputCheck');
 
+router.get('/', (req, res) => {
+    const sql = `
+    SELECT
+    role.*,
+    department.*,
+    CONCAT(m.first_name, ' ', m.last_name) AS manager,
+    e.*
+
+    FROM employee e
+
+    LEFT JOIN (role, department)
+        ON (role.id = e.role_id AND department.id = role.department_id)
+
+    LEFT JOIN employee m
+        ON m.id = e.manager_id
+    `;
+
+    const params = [];
+
+    db.execute(sql, params, (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+
+        res.json({
+            message: 'success',
+            data: rows
+        });
+    });
+});
+
 router.get('/employees', (req, res) => {
 
     const sql = `
@@ -21,6 +53,36 @@ router.get('/employees', (req, res) => {
 
     LEFT JOIN employee m
         ON m.id = e.manager_id
+    `;
+
+    const params = [];
+
+    db.execute(sql, params, (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+
+        res.json({
+            message: 'success',
+            data: rows
+        });
+    });
+});
+
+router.get('/employees/managers/', (req, res) => {
+
+    const sql = `
+    SELECT
+        m.id,
+        CONCAT(m.first_name, ' ', m.last_name) AS manager
+
+    FROM employee e
+
+    LEFT JOIN employee m
+        ON m.id = e.manager_id
+
+    GROUP BY manager
     `;
 
     const params = [];
