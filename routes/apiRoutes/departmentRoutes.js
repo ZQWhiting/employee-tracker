@@ -2,7 +2,7 @@ const router = require('express').Router();
 const db = require('../../db/database');
 const inputCheck = require('../../utils/inputCheck');
 
-// name, id
+// department, id
 router.get('/departments', (req, res) => {
     const sql = `
     SELECT
