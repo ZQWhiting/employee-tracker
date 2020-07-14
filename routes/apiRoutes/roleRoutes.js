@@ -2,6 +2,8 @@ const router = require('express').Router();
 const db = require('../../db/database');
 const inputCheck = require('../../utils/inputCheck');
 
+
+// id, title, salary, department_id
 router.get('/roles', (req, res) => {
     const sql = `TABLE role`
     const params = [];
@@ -19,6 +21,7 @@ router.get('/roles', (req, res) => {
     });
 });
 
+// add role
 router.post('/role', ({body}, res) => {
 
     const errors = inputCheck(body, 'title', 'salary', 'department_id');
@@ -48,6 +51,7 @@ router.post('/role', ({body}, res) => {
     });
 });
 
+// delete role
 router.delete('/role/:id', (req, res) => {
 
     const sql = `

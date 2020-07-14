@@ -2,6 +2,7 @@ const router = require('express').Router();
 const db = require('../../db/database');
 const inputCheck = require('../../utils/inputCheck');
 
+// id, title, salary, department_id, department_name, manager, first_name, last_name, role_id, manager_id
 router.get('/', (req, res) => {
     const sql = `
     SELECT
@@ -34,6 +35,7 @@ router.get('/', (req, res) => {
     });
 });
 
+// id, first_name, last_name, role, salary, department, manager
 router.get('/employees', (req, res) => {
 
     const sql = `
@@ -70,6 +72,7 @@ router.get('/employees', (req, res) => {
     });
 });
 
+// id and manager OF all employees listed as a manager
 router.get('/employees/managers/', (req, res) => {
 
     const sql = `
@@ -100,6 +103,7 @@ router.get('/employees/managers/', (req, res) => {
     });
 });
 
+// id, first_name, last_name, and manager of employees with the same manager
 router.get('/employees/manager/:id', (req, res) => {
 
     const sql = `
@@ -132,6 +136,7 @@ router.get('/employees/manager/:id', (req, res) => {
     });
 });
 
+// id, first_name, last_name, and department of employees with the same department
 router.get('/employees/department/:id', (req, res) => {
 
     const sql = `
@@ -164,6 +169,7 @@ router.get('/employees/department/:id', (req, res) => {
     });
 });
 
+// add an employee
 router.post('/employee', ({body}, res) => {
 
     const errors = inputCheck(body, 'first_name', 'last_name', 'role_id', 'manager_id');
@@ -193,6 +199,7 @@ router.post('/employee', ({body}, res) => {
     });
 });
 
+// update employee role or manager
 router.put('/employee/:update/:id', (req, res) => {
     let idType;
     let newId;
@@ -235,6 +242,7 @@ router.put('/employee/:update/:id', (req, res) => {
     });
 });
 
+// delete employee
 router.delete('/employee/:id', (req, res) => {
 
     const sql = `

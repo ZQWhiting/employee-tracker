@@ -2,6 +2,7 @@ const router = require('express').Router();
 const db = require('../../db/database');
 const inputCheck = require('../../utils/inputCheck');
 
+// name, id
 router.get('/departments', (req, res) => {
     const sql = `TABLE department`
     const params = [];
@@ -51,6 +52,7 @@ router.get('/departments/salary/:id', (req, res) => {
     });
 });
 
+// add department
 router.post('/department', ({body}, res) => {
 
     const errors = inputCheck(body, 'name');
@@ -80,6 +82,7 @@ router.post('/department', ({body}, res) => {
     });
 });
 
+// delete department
 router.delete('/department/:id', (req, res) => {
 
     const sql = `
