@@ -3,7 +3,7 @@ const db = require('../../db/database');
 const inputCheck = require('../../utils/inputCheck');
 
 // id, title, salary, department_id, department_name, manager, first_name, last_name, role_id, manager_id
-router.get('/', (req, res) => {
+router.get('/all', (req, res) => {
     const sql = `
     SELECT
     role.*,
@@ -200,7 +200,7 @@ router.post('/employee', ({body}, res) => {
 });
 
 // update employee role or manager
-router.put('/employee/:update/:id', (req, res) => {
+router.put('/employee/:id/:update', (req, res) => {
     let idType;
     let newId;
 

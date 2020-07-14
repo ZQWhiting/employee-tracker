@@ -2,6 +2,28 @@ const fetch = require('node-fetch');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
 
+const paths = {
+    getAll: 'http://localhost:3001/api/all',
+
+    getEmployees: 'http://localhost:3001/api/employees',
+    getManagers: 'http://localhost:3001/api/employees/managers/',
+    getEmployeeByManager: 'http://localhost:3001/api/employees/manager/:id',
+    getEmployeeByDepartment: 'http://localhost:3001/api/employees/department/:id',
+    addEmployee: 'http://localhost:3001/api/employee',
+    updateEmployeeRole: 'http://localhost:3001/api/employee/:id/role',
+    updateEmployeeManager: 'http://localhost:3001/api/employee/:id/manager',
+    deleteEmployee: 'http://localhost:3001/api/employee/:id',
+
+    getRoles: 'http://localhost:3001/api/roles',
+    addRole: 'http://localhost:3001/api/role',
+    deleteRole: 'http://localhost:3001/api/role/:id',
+
+    getDepartments: 'http://localhost:3001/api/departments',
+    getDepartmentBudget: 'http://localhost:3001/api/departments/salary/:id',
+    addDepartment: 'http://localhost:3001/api/department',
+    deleteDepartment: 'http://localhost:3001/api/department/:id'
+}
+
 const toDoQuestion = [
     {
         type: 'list',
@@ -27,13 +49,42 @@ async function promptToDo() {
     toDoHandler(userInput.toDo)
 };
 
+async function getEmployee() {
+    const employeeData = await getData(paths.getAll)
+
+    employeeChoices = []
+    employeeData.forEach(employeeObj => {
+        employeeChoices.push(`${employeeObj.first_name} ${employeeObj.last_name}`)
+    });
+
+    const { employee } = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'employee',
+            message: 'Choose an employee',
+            choices: employeeChoices,
+            filter: input => {
+                return employeeData.filter(employeeObj => {
+                    if (input === `${employeeObj.first_name} ${employeeObj.last_name}`) {
+                        return employeeObj;
+                    }
+                });
+            }
+        }
+    ])
+
+    return employee[0]
+}
+
 async function toDoHandler(toDo) {
     switch (toDo) {
         //view all employees
         case 0:
             try {
-                const employeeData = await getData('http://localhost:3001/api/employees')
+                // get employee data
+                const employeeData = await getData(paths.getEmployees)
 
+                // display data
                 console.table(employeeData)
 
             } catch (error) {
@@ -46,7 +97,7 @@ async function toDoHandler(toDo) {
         case 1:
             try {
                 // get all employees listed as a manager
-                const managerData = await getData('http://localhost:3001/api/employees/managers')
+                const managerData = await getData(paths.getManagers)
 
                 // push managers into choices array
                 choices = []
@@ -57,7 +108,7 @@ async function toDoHandler(toDo) {
                 });
 
                 // get user input on manager to search by
-                const managerChoice = await inquirer.prompt([
+                const { manager } = await inquirer.prompt([
                     {
                         type: 'list',
                         name: 'manager',
@@ -74,7 +125,8 @@ async function toDoHandler(toDo) {
                 ])
 
                 // get employee info
-                const employeeData = await getData(`http://localhost:3001/api/employees/manager/${managerChoice.manager[0].id}`)
+                const path = paths.getEmployeeByManager.replace(':id', manager[0].id)
+                const employeeData = await getData(path)
 
                 // display employees
                 console.table(employeeData)
@@ -88,14 +140,17 @@ async function toDoHandler(toDo) {
         //view employees by department
         case 2:
             try {
-                const departmentData = await getData('http://localhost:3001/api/departments/')
+                // get department data
+                const departmentData = await getData(paths.getDepartments)
 
+                // populate department choices
                 choices = []
                 departmentData.forEach(element => {
                     choices.push(element.name)
                 });
 
-                const departmentChoice = await inquirer.prompt([
+                // get department from user
+                const { department } = await inquirer.prompt([
                     {
                         type: 'list',
                         name: 'department',
@@ -111,8 +166,11 @@ async function toDoHandler(toDo) {
                     }
                 ])
 
-                const employeeData = await getData(`http://localhost:3001/api/employees/department/${departmentChoice.department[0].id}`)
+                // search by department
+                const path = paths.getEmployeeByDepartment.replace(':id', department[0].id)
+                const employeeData = await getData(path)
 
+                // display results
                 console.table(employeeData);
 
             } catch (error) {
@@ -125,7 +183,7 @@ async function toDoHandler(toDo) {
         case 3:
             try {
                 // get data for roles and employees
-                const [roleData, employeeData] = await Promise.allSettled([getData('http://localhost:3001/api/roles'), getData('http://localhost:3001/api/')])
+                const [roleData, employeeData] = await Promise.allSettled([getData(paths.getRoles), getData(paths.getAll)])
 
                 // populate the choices arrays
                 roleChoices = []
@@ -138,31 +196,30 @@ async function toDoHandler(toDo) {
                 });
 
                 // get user input
-                let { firstName, lastName, role, manager } = await inquirer
-                    .prompt([
-                        {
-                            type: 'input',
-                            name: 'firstName',
-                            message: 'what is their first name?',
-                        },
-                        {
-                            type: 'input',
-                            name: 'lastName',
-                            message: 'what is their last name?',
-                        },
-                        {
-                            type: 'list',
-                            name: 'role',
-                            message: 'what is their role?',
-                            choices: roleChoices
-                        },
-                        {
-                            type: 'list',
-                            name: 'manager',
-                            message: 'who is their manager?',
-                            choices: managerChoices
-                        }
-                    ])
+                let { firstName, lastName, role, manager } = await inquirer.prompt([
+                    {
+                        type: 'input',
+                        name: 'firstName',
+                        message: 'what is their first name?',
+                    },
+                    {
+                        type: 'input',
+                        name: 'lastName',
+                        message: 'what is their last name?',
+                    },
+                    {
+                        type: 'list',
+                        name: 'role',
+                        message: 'what is their role?',
+                        choices: roleChoices
+                    },
+                    {
+                        type: 'list',
+                        name: 'manager',
+                        message: 'who is their manager?',
+                        choices: managerChoices
+                    }
+                ])
 
                 // set the role and manager strings to the respective id's
                 employeeData.value.forEach(element => {
@@ -180,7 +237,7 @@ async function toDoHandler(toDo) {
                 }
 
                 // post employee object to the database
-                const postResponse = await fetch('http://localhost:3001/api/employee', {
+                const postResponse = await fetch(paths.addEmployee, {
                     method: 'POST',
                     body: JSON.stringify({
                         first_name: firstName,
@@ -191,8 +248,11 @@ async function toDoHandler(toDo) {
                     headers: { 'Content-Type': 'application/json' }
                 })
 
+                // display response
                 if (postResponse.ok) {
                     console.log('The employee was successfully added.')
+                } else {
+                    console.log(response.status + response.statusText)
                 }
 
             } catch (error) {
@@ -203,12 +263,103 @@ async function toDoHandler(toDo) {
 
         //update an employee role
         case 4:
+            try {
+                // get the id of the employee to update
+                const [employee, rolesData] = await Promise.allSettled([getEmployee(), getData(paths.getRoles)])
 
+                choices = []
+                rolesData.value.forEach(role => {
+                    choices.push(role.title)
+                });
+
+                const { role } = await inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'role',
+                        message: 'choose a new role',
+                        choices: choices,
+                        filter: input => {
+                            return rolesData.value.filter(roleObj => {
+                                if (input === roleObj.title) {
+                                    return roleObj;
+                                }
+                            });
+                        }
+                    }
+                ])
+
+                // fetch 'put' '/employee/role/:id' body: json( role_id: new role)
+                const path = paths.updateEmployeeRole.replace(':id', employee.value.id)
+                const response = await fetch(path, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        role_id: role[0].id
+                    }),
+                    headers: { 'Content-Type': 'application/json' }
+                })
+
+                // display response
+                if (response.ok) {
+                    console.log("The employee's role was successfully changed.")
+                } else {
+                    console.log(response.status + response.statusText)
+                }
+
+            } catch (error) {
+                console.log(error)
+            }
             break;
 
         //update an employee manager
         case 5:
+            try {
+                // get the id of the employee to update
+                const [employee, employeesData] = await Promise.allSettled([getEmployee(), getData(paths.getAll)])
 
+                choices = ['no manager']
+                employeesData.value.forEach(employeeObj => {
+                    choices.push(`${employeeObj.first_name} ${employeeObj.last_name}`)
+                });
+
+                const { manager } = await inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'manager',
+                        message: 'choose a new manager',
+                        choices: choices,
+                        filter: input => {
+                            if (input === 'no manager') {
+                                return [{id: null}]
+                            }
+                            return employeesData.value.filter(employeeObj => {
+                                if (input === `${employeeObj.first_name} ${employeeObj.last_name}`) {
+                                    return employeeObj;
+                                }
+                            });
+                        }
+                    }
+                ])
+
+                // fetch 'put' '/employee/role/:id' body: json( role_id: new role)
+                const path = paths.updateEmployeeManager.replace(':id', employee.value.id)
+                const response = await fetch(path, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        manager_id: manager[0].id
+                    }),
+                    headers: { 'Content-Type': 'application/json' }
+                })
+
+                // display response
+                if (response.ok) {
+                    console.log("The employee's manager was successfully changed.")
+                } else {
+                    console.log(response.status + response.statusText)
+                }
+
+            } catch (error) {
+                console.log(error)
+            }
             break;
 
         //delete an employee
