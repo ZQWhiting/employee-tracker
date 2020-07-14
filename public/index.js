@@ -29,7 +29,7 @@ const toDoQuestion = [
         type: 'list',
         name: 'toDo',
         message: 'what would you like to do?',
-        choices: ['view all employees', 'view employees by manager', 'view employees by department', 'add an employee', 'update an employee role', 'update an employee manager', 'delete an employee', new inquirer.Separator(), 'view all departments', "view department's total utilized budget", 'add a department', 'delete a department', new inquirer.Separator(), 'view all roles', 'add a role', 'delete a role', new inquirer.Separator()],
+        choices: ['view all employees', 'view employees by manager', 'view employees by department', 'add an employee', 'update an employee role', 'update an employee manager', 'delete an employee', new inquirer.Separator(), 'view all departments', "view department's total utilized budget", 'add a department', 'delete a department', new inquirer.Separator(), 'view all roles', 'add a role', 'delete a role', new inquirer.Separator(), 'exit program', new inquirer.Separator()],
         pageSize: 10,
         filter: input => {
             const { choices } = toDoQuestion[0]
@@ -132,7 +132,11 @@ async function getRole() {
 }
 
 async function toDoHandler(toDo) {
+    // controls whether promptToDo() will fire after this action is finished
+    let repeat = true;
+
     try {
+        // decides current action
         switch (toDo) {
             //view all employees
             case 0:
@@ -217,9 +221,19 @@ async function toDoHandler(toDo) {
                 await deleteRole();
 
                 break;
+            // set repeat to false
+            default:
+                repeat = false;
+                break;
         }
+
     } catch (error) {
         console.log(`${error.status}: ${error.statusText}`)
+    }
+
+    // if repeat is true, prompt user for next action
+    if (repeat) {
+        promptToDo()
     }
 }
 
@@ -276,7 +290,7 @@ async function viewEmployeesByDepartment() {
     // populate department choices
     choices = []
     departmentData.forEach(element => {
-        choices.push(element.name)
+        choices.push(element.department)
     });
 
     // get department from user
@@ -288,7 +302,7 @@ async function viewEmployeesByDepartment() {
             choices: choices,
             filter: input => {
                 return departmentData.filter(departmentObj => {
-                    if (departmentObj.name === input) {
+                    if (input === departmentObj.department) {
                         return departmentObj;
                     }
                 });
@@ -549,13 +563,11 @@ async function viewRoles() {
 async function addRole() {
     const departmentData = await getData(paths.getDepartments)
 
-    console.log(departmentData)
     // populate the choices arrays
     choices = []
     departmentData.forEach(departmentObj => {
         choices.push(departmentObj.department)
     });
-    console.log(choices)
 
     const { title, salary, department } = await inquirer.prompt([
         {
@@ -624,6 +636,20 @@ async function deleteRole() {
 }
 
 function runProgram() {
+    console.log(`
+     _____________________________________________________________________________________________
+    |  ______                 _                         __  __                                    |
+    | |  ____|               | |                       |  \\/  |                                   |
+    | | |__   _ __ ___  _ __ | | ___  _   _  ___  ___  | \\  / | __ _ _ __   __ _  __ _  ___ _ __  |
+    | |  __| | '_ \` _ \\| '_ \\| |/ _ \\| | | |/ _ \\/ _ \\ | |\\/| |/ _\` | '_ \\ / _\` |/ _\` |/ _ \\ '__| |
+    | | |____| | | | | | |_) | | (_) | |_| |  __/  __/ | |  | | (_| | | | | (_| | (_| |  __/ |    |
+    | |______|_| |_| |_| .__/|_|\\___/ \\__, |\\___|\\___| |_|  |_|\\__,_|_| |_|\\__,_|\\__, |\\___|_|    |
+    |                  | |             __/ |                                      __/ |           |
+    |                  |_|            |___/                                      |___/            |
+    |_____________________________________________________________________________________________|
+        `
+    )
+
     promptToDo()
 }
 
