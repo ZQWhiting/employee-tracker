@@ -4,12 +4,7 @@ const inputCheck = require('../../utils/inputCheck');
 
 // department, id
 router.get('/departments', (req, res) => {
-    const sql = `
-    SELECT
-        department.id,
-        department.name AS department
-
-    FROM department`
+    const sql = `TABLE department`
 
     const params = [];
 

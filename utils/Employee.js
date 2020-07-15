@@ -7,22 +7,24 @@ const { getData, getSingleDataRow } = require('../utils/getData')
 class Employee {
     static async viewEmployees() {
         // get employee data
-        const employeeData = await getData(paths.getEmployees);
+        const employeeData = await getData(paths.getEmployees)
+            .catch(err => { throw 'No employee data found (required). Please create an employee.' })
+
         // display data
+
         console.table(employeeData);
-        return employeeData;
     }
 
     static async viewEmployeesByManager() {
         // get all employees listed as a manager
         const managerData = await getData(paths.getManagers)
-
+            .catch(err => { throw 'No manager data found (required). Please assign a manager.' })
 
         // push managers into choices array
         const choices = []
         managerData.forEach(element => {
             if (element.manager) {
-                choices.push(element.manager)
+                choices.push({name: element.manager, value: element.id})
             }
         });
         // get user input on manager to search by
@@ -31,19 +33,12 @@ class Employee {
                 type: 'list',
                 name: 'manager',
                 message: 'search by which manager?',
-                choices: choices,
-                filter: input => {
-                    return managerData.filter(managerObj => {
-                        if (managerObj.manager === input) {
-                            return managerObj;
-                        }
-                    });
-                }
+                choices: choices
             }
         ])
 
         // get employee info
-        const path = paths.getEmployeeByManager.replace(':id', manager[0].id)
+        const path = paths.getEmployeeByManager.replace(':id', manager)
         const employeeData = await getData(path)
 
         // display employees
@@ -53,11 +48,12 @@ class Employee {
     static async viewEmployeesByDepartment() {
         // get department data
         const departmentData = await getData(paths.getDepartments)
+            .catch(err => { throw 'No department data found (required). Please create a department.' })
 
         // populate department choices
         const choices = []
         departmentData.forEach(element => {
-            choices.push(element.department)
+            choices.push({name: element.name, value: element.id})
         });
 
         // get department from user
@@ -66,19 +62,12 @@ class Employee {
                 type: 'list',
                 name: 'department',
                 message: 'search by which department?',
-                choices: choices,
-                filter: input => {
-                    return departmentData.filter(departmentObj => {
-                        if (input === departmentObj.department) {
-                            return departmentObj;
-                        }
-                    });
-                }
+                choices: choices
             }
         ])
 
         // search by department
-        const path = paths.getEmployeeByDepartment.replace(':id', department[0].id)
+        const path = paths.getEmployeeByDepartment.replace(':id', department)
         const employeeData = await getData(path)
 
         // display results
@@ -87,17 +76,24 @@ class Employee {
 
     static async addEmployee() {
         // get data for roles and employees
-        const [roleData, employeeData] = await Promise.allSettled([getData(paths.getRoles), getData(paths.getAll)])
+        const [roleData, employeeData] = await Promise.all([
+            getData(paths.getRoles)
+                .catch((err) => { throw 'No role data found (required). Please create a role.' }),
+            getData(paths.getEmployees)
+                .catch(err => true)
+        ])
 
         // populate the choices arrays
         const roleChoices = []
-        const managerChoices = ['None']
-        roleData.value.forEach(element => {
-            roleChoices.push(element.title)
+        const managerChoices = [{name: 'None', value: null}]
+        roleData.forEach(element => {
+            roleChoices.push({name: element.title, value: element.id})
         });
-        employeeData.value.forEach(element => {
-            managerChoices.push(`${element.first_name} ${element.last_name}`)
-        });
+        if (Array.isArray(employeeData)) {
+            employeeData.forEach(element => {
+                managerChoices.push({name: `${element.first_name} ${element.last_name}`, value: element.id})
+            });
+        }
 
         // get user input
         let { firstName, lastName, role, manager } = await inquirer.prompt([
@@ -105,11 +101,15 @@ class Employee {
                 type: 'input',
                 name: 'firstName',
                 message: 'what is their first name?',
+                validate: input => input.match(/^[a-zA-Z]+$/) ? true : "Please enter a name (characters only).",
+                filter: input => input.charAt(0).toUpperCase() + input.slice(1).toLowerCase()
             },
             {
                 type: 'input',
                 name: 'lastName',
                 message: 'what is their last name?',
+                validate: input => input.match(/^[a-zA-Z]+$/) ? true : "Please enter a name (characters only).",
+                filter: input => input.charAt(0).toUpperCase() + input.slice(1).toLowerCase()
             },
             {
                 type: 'list',
@@ -124,21 +124,6 @@ class Employee {
                 choices: managerChoices
             }
         ])
-
-        // set the role and manager strings to the respective id's
-        employeeData.value.forEach(element => {
-            if (manager === `${element.first_name} ${element.last_name}`) {
-                manager = element.id
-            }
-            if (role === element.title) {
-                role = element.role_id
-            }
-        })
-
-        // if user selected 'None', set value of manager to null
-        if (manager === 'None') {
-            manager = null;
-        }
 
         // post employee object to the database
         const postResponse = await fetch(paths.addEmployee, {
@@ -162,12 +147,17 @@ class Employee {
 
     static async updateEmployeeRole() {
         // get the id of the employee to update
-        const [employee, rolesData] = await Promise.allSettled([getSingleDataRow('employee'), getData(paths.getRoles)])
+        const [employeeId, rolesData] = await Promise.all([
+            getSingleDataRow('employee')
+                .catch((err) => { throw 'No employee data found (required). Please create an employee.' }),
+            getData(paths.getRoles)
+                .catch((err) => { throw 'No role data found (required). Please create a role.' })
+        ])
 
         // populate the choices array
         const choices = []
-        rolesData.value.forEach(role => {
-            choices.push(role.title)
+        rolesData.forEach(role => {
+            choices.push({name: role.title, value: role.id})
         });
 
         // get user input
@@ -176,23 +166,16 @@ class Employee {
                 type: 'list',
                 name: 'role',
                 message: 'choose a new role',
-                choices: choices,
-                filter: input => {
-                    return rolesData.value.filter(roleObj => {
-                        if (input === roleObj.title) {
-                            return roleObj;
-                        }
-                    });
-                }
+                choices: choices
             }
         ])
 
         // update employee's role_id in the database
-        const path = paths.updateEmployeeRole.replace(':id', employee.value.id)
+        const path = paths.updateEmployeeRole.replace(':id', employeeId)
         const response = await fetch(path, {
             method: 'PUT',
             body: JSON.stringify({
-                role_id: role[0].id
+                role_id: role
             }),
             headers: { 'Content-Type': 'application/json' }
         })
@@ -207,12 +190,19 @@ class Employee {
 
     static async updateEmployeeManager() {
         // get the id of the employee to update
-        const [employee, employeesData] = await Promise.allSettled([getSingleDataRow('employee'), getData(paths.getAll)])
+        const [employeeId, employeesData] = await Promise.all([
+            getSingleDataRow('employee')
+                .catch((err) => { throw 'No employee data found (required). Please create an employee.' }),
+            getData(paths.getEmployees)
+                .catch((err) => { throw 'No employee data found (required). Please create an employee.' })
+        ])
 
         // populate the choices array
-        const choices = ['None']
-        employeesData.value.forEach(employeeObj => {
-            choices.push(`${employeeObj.first_name} ${employeeObj.last_name}`)
+        const choices = [{name: 'None', value: null}]
+        employeesData.forEach(employeeObj => {
+            if (employeeObj.id !== employeeId) {
+                choices.push({name: `${employeeObj.first_name} ${employeeObj.last_name}`, value: employeeObj.id})
+            }
         });
 
         // get user input
@@ -221,26 +211,16 @@ class Employee {
                 type: 'list',
                 name: 'manager',
                 message: 'choose a new manager',
-                choices: choices,
-                filter: input => {
-                    if (input === 'None') {
-                        return [{ id: null }]
-                    }
-                    return employeesData.value.filter(employeeObj => {
-                        if (input === `${employeeObj.first_name} ${employeeObj.last_name}`) {
-                            return employeeObj;
-                        }
-                    });
-                }
+                choices: choices
             }
         ])
 
         // update the employee's manager_id in the database
-        const path = paths.updateEmployeeManager.replace(':id', employee.value.id)
+        const path = paths.updateEmployeeManager.replace(':id', employeeId)
         const response = await fetch(path, {
             method: 'PUT',
             body: JSON.stringify({
-                manager_id: manager[0].id
+                manager_id: manager
             }),
             headers: { 'Content-Type': 'application/json' }
         })
@@ -255,10 +235,11 @@ class Employee {
 
     static async deleteEmployee() {
         // get the employee to delete
-        const employee = await getSingleDataRow('employee');
+        const employeeId = await getSingleDataRow('employee')
+            .catch((err) => { throw 'No employee data found (required). Please create an employee.' })
 
         // delete the employee from the database
-        const path = paths.deleteEmployee.replace(':id', employee.id)
+        const path = paths.deleteEmployee.replace(':id', employeeId)
         const response = await fetch(path, {
             method: 'DELETE'
         })

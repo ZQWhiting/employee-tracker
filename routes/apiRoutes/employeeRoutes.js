@@ -2,39 +2,6 @@ const router = require('express').Router();
 const db = require('../../db/database');
 const inputCheck = require('../../utils/inputCheck');
 
-// id, title, salary, department_id, department_name, manager, first_name, last_name, role_id, manager_id
-router.get('/all', (req, res) => {
-    const sql = `
-    SELECT
-    role.*,
-    department.*,
-    CONCAT(m.first_name, ' ', m.last_name) AS manager,
-    e.*
-
-    FROM employee e
-
-    LEFT JOIN (role, department)
-        ON (role.id = e.role_id AND department.id = role.department_id)
-
-    LEFT JOIN employee m
-        ON m.id = e.manager_id
-    `;
-
-    const params = [];
-
-    db.execute(sql, params, (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-        }
-
-        res.json({
-            message: 'success',
-            data: rows
-        });
-    });
-});
-
 // id, first_name, last_name, role, salary, department, manager
 router.get('/employees', (req, res) => {
 
@@ -43,9 +10,9 @@ router.get('/employees', (req, res) => {
         e.id,
         e.first_name,
         e.last_name,
-        role.title AS Role,
-        role.salary,
+        role.title,
         department.name AS department,
+        role.salary,
         CONCAT(m.first_name, ' ', m.last_name) AS manager
 
     FROM employee e
@@ -85,7 +52,9 @@ router.get('/employees/managers/', (req, res) => {
     LEFT JOIN employee m
         ON m.id = e.manager_id
 
-    GROUP BY manager
+    WHERE m.id
+
+    GROUP BY e.manager_id
     `;
 
     const params = [];
@@ -170,7 +139,7 @@ router.get('/employees/department/:id', (req, res) => {
 });
 
 // add an employee
-router.post('/employee', ({body}, res) => {
+router.post('/employee', ({ body }, res) => {
 
     const errors = inputCheck(body, 'first_name', 'last_name', 'role_id', 'manager_id');
     if (errors) {

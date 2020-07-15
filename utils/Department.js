@@ -7,7 +7,8 @@ const { getData, getSingleDataRow } = require('../utils/getData')
 class Department {
     static async viewDepartments() {
         // get the departments from the database
-        const departmentsData = await getData(paths.getDepartments);
+        const departmentsData = await getData(paths.getDepartments)
+            .catch((err) => { throw 'No department data found (required). Please create a department.' })
 
         // display the data
         console.table(departmentsData)
@@ -15,18 +16,19 @@ class Department {
 
     static async viewDepartmentBudget() {
         // get the department to view
-        const department = await getSingleDataRow('department')
+        const departmentId = await getSingleDataRow('department')
+            .catch((err) => { throw 'No department data found (required). Please create a department.' })
 
         // get the budget data of the department
-        const path = paths.getDepartmentBudget.replace(':id', department.id)
+        const path = paths.getDepartmentBudget.replace(':id', departmentId)
         const departmentsData = await getData(path)
 
         // display the data
-        if (departmentsData[0].department === null) {
-            console.log('No budget data for selected department.')
-        } else {
-            console.table(departmentsData)
+        if (!departmentsData[0].department) {
+            throw 'No budget data found for selected department.'
         }
+
+        console.table(departmentsData)
     }
 
     static async addDepartment() {
@@ -36,8 +38,16 @@ class Department {
                 type: 'input',
                 name: 'department',
                 message: 'Name the new department',
-                validation: input => {
-                    if (input) input
+                validate: input => input.match(/^[a-zA-Z ]+$/) ? true : "Please enter a name (characters and spaces only).",
+                filter: input => {
+                    return input
+                        .trim()
+                        .replace(/\s+/g, ' ')
+                        .split(' ')
+                        .map(word => {
+                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                        })
+                        .join(' ')
                 }
             }
         ])
@@ -61,10 +71,11 @@ class Department {
 
     static async deleteDepartment() {
         // get the department to delete
-        const department = await getSingleDataRow('department');
+        const departmentId = await getSingleDataRow('department')
+            .catch((err) => { throw 'No department data found (required). Please create a department.' })
 
         // delete the department from the database
-        const path = paths.deleteDepartment.replace(':id', department.id)
+        const path = paths.deleteDepartment.replace(':id', departmentId)
         const response = await fetch(path, {
             method: 'DELETE'
         })

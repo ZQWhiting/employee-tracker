@@ -9,8 +9,8 @@ async function promptToDo() {
         {
             type: 'list',
             name: 'toDo',
-            message: 'what would you like to do?',
-            choices: ['view all employees', 'view employees by manager', 'view employees by department', 'add an employee', 'update an employee role', 'update an employee manager', 'delete an employee', new inquirer.Separator(), 'view all departments', "view department's total utilized budget", 'add a department', 'delete a department', new inquirer.Separator(), 'view all roles', 'add a role', 'delete a role', new inquirer.Separator(), 'exit program', new inquirer.Separator()],
+            message: 'What would you like to do?',
+            choices: ['View all employees', 'View employees by manager', 'View employees by department', 'Add an employee', 'Update an employee role', 'Update an employee manager', 'Delete an employee', new inquirer.Separator(), 'View all departments', "View department's total utilized budget", 'Add a department', 'Delete a department', new inquirer.Separator(), 'View all roles', 'Add a role', 'Delete a role', new inquirer.Separator(), 'Exit program', new inquirer.Separator()],
             pageSize: 10,
             filter: input => {
                 const { choices } = question[0]
@@ -122,7 +122,11 @@ async function toDoHandler(toDo) {
         }
 
     } catch (error) {
-        console.log(`${error.status}: ${error.statusText}`)
+        if (error.status) {
+            console.error(`${error.status}: ${error.statusText}`)
+        } else {
+            console.error(error)
+        }
     }
 
     // if repeat is true, prompt user for next action

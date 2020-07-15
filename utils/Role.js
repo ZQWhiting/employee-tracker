@@ -2,12 +2,14 @@ require('console.table');
 const fetch = require('node-fetch');
 const inquirer = require('inquirer');
 const paths = require('../utils/paths')
-const { getData, getSingleDataRow } = require('../utils/getData')
+const { getData, getSingleDataRow } = require('../utils/getData');
+const { map } = require('mysql2/lib/constants/charset_encodings');
 
 class Role {
     static async viewRoles() {
         // get the roles to view
-        const rolesData = await getData(paths.getRoles);
+        const rolesData = await getData(paths.getRoles)
+            .catch((err) => { throw 'No role data found (required). Please create a role.' })
 
         // display the data
         console.table(rolesData)
@@ -16,11 +18,12 @@ class Role {
     static async addRole() {
         // get the department data for department_id
         const departmentData = await getData(paths.getDepartments)
+            .catch((err) => { throw 'No department data found (required). Please create a department.' })
 
         // populate the choices arrays
-        choices = []
+        const choices = []
         departmentData.forEach(departmentObj => {
-            choices.push(departmentObj.department)
+            choices.push({ name: departmentObj.name, value: departmentObj.id })
         });
 
         // get user input
@@ -29,32 +32,29 @@ class Role {
                 type: 'input',
                 name: 'title',
                 message: 'Name the new role',
-                validation: input => {
-                    if (input) input
-                },
+                validate: input => input.match(/^[a-zA-Z ]+$/) ? true : "Please enter a name (characters and spaces only).",
+                filter: input => {
+                    return input
+                        .trim()
+                        .replace(/\s+/g, ' ')
+                        .split(' ')
+                        .map(word => {
+                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                        })
+                        .join(' ')
+                }
             },
             {
-                type: 'number',
+                type: 'input',
                 name: 'salary',
                 message: "What is the new role's salary?",
-                validation: input => {
-                    if (!input || !input === typeof Number) {
-                        return false;
-                    }
-                },
+                validate: input => input.match(/^\d+$/) ? true : 'Please enter a number (no symbols or decimals).',
             },
             {
                 type: 'list',
                 name: 'department',
                 message: 'What deparment does the new role belong to?',
-                choices: choices,
-                filter: input => {
-                    return departmentData.filter(departmentObj => {
-                        if (input === departmentObj.department) {
-                            return departmentObj;
-                        }
-                    })
-                }
+                choices: choices
             }
         ])
 
@@ -64,25 +64,26 @@ class Role {
             body: JSON.stringify({
                 title: title,
                 salary: salary,
-                department_id: department[0].id
+                department_id: department
             }),
             headers: { 'Content-Type': 'application/json' }
         })
 
         // display the response
-        if (response.ok) {
-            console.log('Role was successfully added')
-        } else {
+        if (!response.ok) {
             throw response
         }
+
+        console.log('Role was successfully added')
     }
 
     static async deleteRole() {
         // get the role to delete
-        const role = await getSingleDataRow('role');
+        const roleId = await getSingleDataRow('role')
+            .catch((err) => { throw 'No role data found (required). Please create a role.' })
 
         // delete the role from the database
-        const path = paths.deleteRole.replace(':id', role.id)
+        const path = paths.deleteRole.replace(':id', roleId)
         const response = await fetch(path, {
             method: 'DELETE'
         })

@@ -6,14 +6,15 @@ async function getData(path) {
     const res = await fetch(path)
     if (!res.ok) throw res;
     const json = await res.json()
+    if (!json.data.length) {return Promise.reject('No data found.')}
     return json.data
 }
 
 async function getSingleDataRow(type) {
-    let dataArr;
+    let dataArr = [];
     switch (type) {
         case 'employee':
-            dataArr = await getData(paths.getAll)
+            dataArr = await getData(paths.getEmployees)
             break;
         case 'department':
             dataArr = await getData(paths.getDepartments)
@@ -23,17 +24,17 @@ async function getSingleDataRow(type) {
             break;
     }
 
-    choices = []
+    const choices = []
     dataArr.forEach(dataObj => {
         switch (type) {
             case 'employee':
-                choices.push(`${dataObj.first_name} ${dataObj.last_name}`)
+                choices.push({name: `${dataObj.first_name} ${dataObj.last_name}`, value: dataObj.id})
                 break;
             case 'department':
-                choices.push(dataObj.department)
+                choices.push({name: dataObj.name, value: dataObj.id})
                 break;
             case 'role':
-                choices.push(dataObj.title)
+                choices.push({name: dataObj.title, value: dataObj.id})
                 break;
         }
 
@@ -44,31 +45,10 @@ async function getSingleDataRow(type) {
             type: 'list',
             name: 'input',
             message: `Which ${type}?`,
-            choices: choices,
-            filter: input => {
-                return dataArr.filter(dataObj => {
-                    switch (type) {
-                        case 'employee':
-                            if (input === `${dataObj.first_name} ${dataObj.last_name}`) {
-                                return dataObj;
-                            }
-                            break;
-                        case 'department':
-                            if (input === dataObj.department) {
-                                return dataObj;
-                            }
-                            break;
-                        case 'role':
-                            if (input === dataObj.title) {
-                                return dataObj;
-                            }
-                            break;
-                    }
-                });
-            }
+            choices: choices
         }
     ])
-    return input[0]
+    return input
 }
 
 
