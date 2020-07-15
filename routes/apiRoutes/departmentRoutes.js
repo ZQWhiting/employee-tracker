@@ -23,7 +23,7 @@ router.get('/departments', (req, res) => {
 
 //View the total utilized budget of a department—
 //i.e., the combined salaries of all employees in that department.
-router.get('/departments/salary/:id', (req, res) => {
+router.get('/departments/:id/salary', (req, res) => {
 
     const sql = `
     SELECT

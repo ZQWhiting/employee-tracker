@@ -1,6 +1,4 @@
 const paths = {
-    getAll: 'http://localhost:3001/api/all',
-
     getEmployees: 'http://localhost:3001/api/employees',
     getManagers: 'http://localhost:3001/api/employees/managers/',
     getEmployeeByManager: 'http://localhost:3001/api/employees/manager/:id',
@@ -15,7 +13,7 @@ const paths = {
     deleteRole: 'http://localhost:3001/api/role/:id',
 
     getDepartments: 'http://localhost:3001/api/departments',
-    getDepartmentBudget: 'http://localhost:3001/api/departments/salary/:id',
+    getDepartmentBudget: 'http://localhost:3001/api/departments/:id/salary',
     addDepartment: 'http://localhost:3001/api/department',
     deleteDepartment: 'http://localhost:3001/api/department/:id'
 }
