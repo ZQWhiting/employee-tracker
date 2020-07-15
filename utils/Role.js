@@ -3,7 +3,6 @@ const fetch = require('node-fetch');
 const inquirer = require('inquirer');
 const paths = require('../utils/paths')
 const { getData, getSingleDataRow } = require('../utils/getData');
-const { map } = require('mysql2/lib/constants/charset_encodings');
 
 class Role {
     static async viewRoles() {
