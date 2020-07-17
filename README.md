@@ -32,7 +32,7 @@ Employee Tracker is a content management system using a command-line interface d
     ```
     mysql> SOURCE db/schema.sql;
     ```
-5. (Optional) Popualte the database with test data:
+5. (Optional) Populate the database with test data:
     ```
     mysql> SOURCE db/seeds.sql;
     ```
