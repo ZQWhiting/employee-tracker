@@ -25,9 +25,7 @@ Employee Tracker is a content management system using a command-line interface d
 ## Installation:
 1. Clone the repository.
 2. Navigate to the repository in the terminal and run `npm i`.
-3. Login to mysql in the terminal with `mysql -u root -p`,
-    where 'root' is your username (default: root),
-    and enter your password at the prompt.
+3. Login to mysql in the terminal with `mysql -u root -p` (where 'root' is your username, default: root) and enter your password at the prompt.
 4. In mysql, create the database:
     ```
     mysql> SOURCE db/schema.sql;
