@@ -5,7 +5,18 @@ const inputCheck = require('../../utils/inputCheck');
 
 // id, title, salary, department_id
 router.get('/roles', (req, res) => {
-    const sql = `TABLE role`
+    const sql = `
+    SELECT
+        role.id,
+        role.title,
+        role.salary,
+        department.name AS department
+
+    FROM role
+
+    LEFT JOIN (department)
+        ON (department.id = role.department_id)
+    `
     const params = [];
 
     db.execute(sql, params, (err, rows) => {
