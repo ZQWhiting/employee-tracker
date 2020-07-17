@@ -48,7 +48,7 @@ Employee Tracker is a content management system using a command-line interface d
 <a name='usage'></a>
 ## Usage
 * Run the server in the terminal using `npm start`.
-* Run the app in the terminal using `npm run app`.
+* Run the app in another terminal using `npm run app`.
 * Select an option from the menu.
 * Enter information as necessary.
 
