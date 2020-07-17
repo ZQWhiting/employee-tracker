@@ -47,6 +47,7 @@ Employee Tracker is a content management system using a command-line interface d
 
 <a name='usage'></a>
 ## Usage
+[Walkthrough Video](https://youtu.be/4XFCmmTDg0M)
 * Run the server in the terminal using `npm start`.
 * Run the app in another terminal using `npm run app`.
 * Select an option from the menu.
@@ -59,13 +60,6 @@ Licensed under the [ISC](./docs/LICENSE.txt) license.
 <a name='contributing'></a>
 ## Contributing
 [Contributor Covenant](./docs/contributor-covenant.txt)
-
-<a name='tests'></a>
-## Tests
-```
- npm test
-```
-(Uses [Jest](https://www.npmjs.com/package/jest))
 
 <a name='questions'></a>
 ## Questions
