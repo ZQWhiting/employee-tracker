@@ -1,8 +1,9 @@
 require('console.table');
 const fetch = require('node-fetch');
 const inquirer = require('inquirer');
-const paths = require('../utils/paths')
-const { getData, getSingleDataRow } = require('../utils/getData')
+const paths = require('../../utils/paths')
+const { getData, getSingleDataRow } = require('../../utils/getData');
+const { toTitleCaseTrim, createChoicesArray } = require('../../utils/utils');
 
 class Employee {
     static async viewEmployees() {
@@ -21,12 +22,8 @@ class Employee {
             .catch(err => { throw 'No manager data found (required). Please assign a manager.' })
 
         // push managers into choices array
-        const choices = []
-        managerData.forEach(element => {
-            if (element.manager) {
-                choices.push({name: element.manager, value: element.id})
-            }
-        });
+        const choices = createChoicesArray(managerData, 'manager')
+
         // get user input on manager to search by
         const { manager } = await inquirer.prompt([
             {
@@ -51,10 +48,7 @@ class Employee {
             .catch(err => { throw 'No department data found (required). Please create a department.' })
 
         // populate department choices
-        const choices = []
-        departmentData.forEach(element => {
-            choices.push({name: element.name, value: element.id})
-        });
+        const choices = createChoicesArray(departmentData, 'department')
 
         // get department from user
         const { department } = await inquirer.prompt([
@@ -84,15 +78,10 @@ class Employee {
         ])
 
         // populate the choices arrays
-        const roleChoices = []
-        const managerChoices = [{name: 'None', value: null}]
-        roleData.forEach(element => {
-            roleChoices.push({name: element.title, value: element.id})
-        });
+        const roleChoices = createChoicesArray(roleData, 'role')
+        let managerChoices = [{name: 'None', value: null}]
         if (Array.isArray(employeeData)) {
-            employeeData.forEach(element => {
-                managerChoices.push({name: `${element.first_name} ${element.last_name}`, value: element.id})
-            });
+            managerChoices = [...managerChoices, ...createChoicesArray(employeeData, 'employee')]
         }
 
         // get user input
@@ -102,14 +91,14 @@ class Employee {
                 name: 'firstName',
                 message: 'what is their first name?',
                 validate: input => input.match(/^[a-zA-Z]+$/) ? true : "Please enter a name (characters only).",
-                filter: input => input.charAt(0).toUpperCase() + input.slice(1).toLowerCase()
+                filter: input => toTitleCaseTrim(input)
             },
             {
                 type: 'input',
                 name: 'lastName',
                 message: 'what is their last name?',
                 validate: input => input.match(/^[a-zA-Z]+$/) ? true : "Please enter a name (characters only).",
-                filter: input => input.charAt(0).toUpperCase() + input.slice(1).toLowerCase()
+                filter: input => toTitleCaseTrim(input)
             },
             {
                 type: 'list',
@@ -155,10 +144,7 @@ class Employee {
         ])
 
         // populate the choices array
-        const choices = []
-        rolesData.forEach(role => {
-            choices.push({name: role.title, value: role.id})
-        });
+        const choices = createChoicesArray(rolesData, 'role')
 
         // get user input
         const { role } = await inquirer.prompt([
@@ -198,12 +184,13 @@ class Employee {
         ])
 
         // populate the choices array
-        const choices = [{name: 'None', value: null}]
-        employeesData.forEach(employeeObj => {
-            if (employeeObj.id !== employeeId) {
-                choices.push({name: `${employeeObj.first_name} ${employeeObj.last_name}`, value: employeeObj.id})
+        const choices = [{ name: 'None', value: null }, ...createChoicesArray(employeesData, 'employee')]
+        // prevent manager from being self
+        for (let i = 0; i < choices.length; i++) {
+            if (employeeId === choices[i].value) {
+                choices.splice(i, 1)
             }
-        });
+        }
 
         // get user input
         const { manager } = await inquirer.prompt([

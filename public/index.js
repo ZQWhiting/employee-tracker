@@ -1,8 +1,8 @@
 const inquirer = require('inquirer');
 const displayProgramTitle = require('../utils/consoleArt')
-const Employee = require('../utils/Employee')
-const Department = require('../utils/Department')
-const Role = require('../utils/Role')
+const Employee = require('./selection_handlers/Employee')
+const Department = require('./selection_handlers/Department')
+const Role = require('./selection_handlers/Role')
 
 async function promptToDo() {
     const question = [
@@ -115,7 +115,7 @@ async function toDoHandler(toDo) {
 
                 break;
 
-            // set repeat to false
+            // set repeat to false on `Exit program`.
             default:
                 repeat = false;
                 break;

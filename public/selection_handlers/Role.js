@@ -1,8 +1,9 @@
 require('console.table');
 const fetch = require('node-fetch');
 const inquirer = require('inquirer');
-const paths = require('../utils/paths')
-const { getData, getSingleDataRow } = require('../utils/getData');
+const paths = require('../../utils/paths')
+const { getData, getSingleDataRow } = require('../../utils/getData');
+const { toTitleCaseTrim, createChoicesArray } = require('../../utils/utils');
 
 class Role {
     static async viewRoles() {
@@ -20,10 +21,7 @@ class Role {
             .catch((err) => { throw 'No department data found (required). Please create a department.' })
 
         // populate the choices arrays
-        const choices = []
-        departmentData.forEach(departmentObj => {
-            choices.push({ name: departmentObj.name, value: departmentObj.id })
-        });
+        const choices = createChoicesArray(departmentData, 'department')
 
         // get user input
         const { title, salary, department } = await inquirer.prompt([
@@ -32,16 +30,7 @@ class Role {
                 name: 'title',
                 message: 'Name the new role',
                 validate: input => input.match(/^[a-zA-Z ]+$/) ? true : "Please enter a name (characters and spaces only).",
-                filter: input => {
-                    return input
-                        .trim()
-                        .replace(/\s+/g, ' ')
-                        .split(' ')
-                        .map(word => {
-                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                        })
-                        .join(' ')
-                }
+                filter: input => toTitleCaseTrim(input)
             },
             {
                 type: 'input',

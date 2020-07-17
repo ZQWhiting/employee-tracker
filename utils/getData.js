@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const inquirer = require('inquirer');
-const paths = require('./paths')
+const paths = require('./paths');
+const { createChoicesArray } = require('./utils');
 
 async function getData(path) {
     const res = await fetch(path)
@@ -24,21 +25,7 @@ async function getSingleDataRow(type) {
             break;
     }
 
-    const choices = []
-    dataArr.forEach(dataObj => {
-        switch (type) {
-            case 'employee':
-                choices.push({name: `${dataObj.first_name} ${dataObj.last_name}`, value: dataObj.id})
-                break;
-            case 'department':
-                choices.push({name: dataObj.name, value: dataObj.id})
-                break;
-            case 'role':
-                choices.push({name: dataObj.title, value: dataObj.id})
-                break;
-        }
-
-    });
+    const choices = createChoicesArray(dataArr, type)
 
     const { input } = await inquirer.prompt([
         {

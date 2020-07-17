@@ -1,8 +1,10 @@
 require('console.table');
 const fetch = require('node-fetch');
 const inquirer = require('inquirer');
-const paths = require('../utils/paths')
-const { getData, getSingleDataRow } = require('../utils/getData')
+const paths = require('../../utils/paths')
+const { getData, getSingleDataRow } = require('../../utils/getData');
+const { toTitleCaseTrim } = require('../../utils/utils');
+
 
 class Department {
     static async viewDepartments() {
@@ -33,22 +35,13 @@ class Department {
 
     static async addDepartment() {
         // user names the department
-        const { department } = await inquirer.prompt([
+        const { name } = await inquirer.prompt([
             {
                 type: 'input',
-                name: 'department',
+                name: 'name',
                 message: 'Name the new department',
                 validate: input => input.match(/^[a-zA-Z ]+$/) ? true : "Please enter a name (characters and spaces only).",
-                filter: input => {
-                    return input
-                        .trim()
-                        .replace(/\s+/g, ' ')
-                        .split(' ')
-                        .map(word => {
-                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                        })
-                        .join(' ')
-                }
+                filter: input => toTitleCaseTrim(input)
             }
         ])
 
@@ -56,7 +49,7 @@ class Department {
         const response = await fetch(paths.addDepartment, {
             method: 'POST',
             body: JSON.stringify({
-                name: department
+                name: name
             }),
             headers: { 'Content-Type': 'application/json' }
         })

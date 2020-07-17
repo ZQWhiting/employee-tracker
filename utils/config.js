@@ -14,13 +14,12 @@ function getConfigValues() {
   return results;
 }
 
-const data = getConfigValues()
-const { user, password, port, host, database } = data;
+const { user, password, port, host, database } = getConfigValues()
 
 module.exports = {
-  port,
-  host,
   user,
   password,
+  port,
+  host,
   database
 }

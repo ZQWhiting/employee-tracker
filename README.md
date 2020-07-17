@@ -3,7 +3,7 @@
 
 <a name='description'></a>
 ## Description
-Employee Tracker is a content management system designed to help manage a company's employee database.
+Employee Tracker is a content management system using a command-line interface designed to help manage a company's employee database.
 
 ## Table of Contents
 * [Description](#Description)
@@ -18,8 +18,8 @@ Employee Tracker is a content management system designed to help manage a compan
 
 <a name='Prerequisites'></a>
 ## Prerequisites:
-* [node](https://nodejs.org/en/)
-* [mysql](https://www.mysql.com/)
+* [Node](https://nodejs.org/en/)
+* [MySQL](https://www.mysql.com/)
 
 <a name='installation'></a>
 ## Installation:
