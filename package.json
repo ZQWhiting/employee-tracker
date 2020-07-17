@@ -5,10 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "db": "mysql --login-path=employee-tracker employee",
-    "migrate": "npm run db < db/schema.sql",
-    "seed": "npm run db < db/seeds.sql",
-    "start": "nodemon server.js"
+    "start": "node server.js",
+    "app": "node public/index"
   },
   "repository": {
     "type": "git",
