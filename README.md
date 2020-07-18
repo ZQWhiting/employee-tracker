@@ -40,7 +40,7 @@ Employee Tracker is a content management system using a command-line interface d
     mysql> GRANT ALL PRIVILEGES ON employee.* TO 'user'@'localhost';
     ```
 7. Exit mysql with `mysql > quit;` or `mysql > exit;`.
-8. Enter your mysql user and password in the `config.txt` file.
+8. Enter your mysql user and password in the `.env` file.
 9. Run `npm start` in the terminal to run the server.
 10. Open a new terminal and navigate to the repository.
 11. Run `npm run app` in the new terminal to run the app.
