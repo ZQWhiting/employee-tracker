@@ -1,5 +1,0 @@
-user=employer
-password=bossman
-port=3001
-host=localhost
-database=employee

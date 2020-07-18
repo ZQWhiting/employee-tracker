@@ -1,7 +1,8 @@
-let { host, port } = require('./config')
+require('dotenv').config()
 
-if (port) {
-    host = `${host}:${port}`
+let host = process.env.host
+if (process.env.port) {
+    host = `${process.env.host}:${process.env.port}`
 }
 
 const paths = {

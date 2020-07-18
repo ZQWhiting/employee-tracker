@@ -1,8 +1,7 @@
 const express = require('express');
 const db = require('./db/database');
-const { port } = require('./utils/config');
 
-const PORT = process.env.PORT || parseInt(port);
+const PORT = process.env.PORT || parseInt(process.env.port);
 const app = express();
 
 const apiRoutes = require('./routes/apiRoutes');
